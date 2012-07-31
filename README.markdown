@@ -1,6 +1,6 @@
 GiantDwarf
 =========
-A ridiculously simple Nagios bot for Campfire.
+A silly little Campfire bot for Nagios.
 
 Usage
 ----
