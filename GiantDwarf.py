@@ -45,10 +45,11 @@ def send_to_room(last_run, room):
     and return the last event's time
     """
     html = utils.open_page()
-    nagios_events = get_nagios_events(html)
+    if not html:
+        return last_run
 
+    nagios_events = get_nagios_events(html)
     if not nagios_events:
-        # No new last run time if nothing was collected from Nagios page
         return last_run
 
     for event in nagios_events:

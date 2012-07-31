@@ -1,24 +1,30 @@
-import httplib2
+import urllib2
 import settings
 from datetime import datetime
 
 def open_page():
     """
     Return HTML content from a webpage as a string
+    Handles authentication using credentials specified in settings.py
     """
-    h = httplib2.Http(".cache")
-    h.add_credentials(settings.NAGIOS_USERNAME, settings.NAGIOS_PASSWORD)
-    use_ssl = ''
-    if settings.USE_SSL: 
-        use_ssl = 's'
-    nagios_domain = 'http{0}://{1}/cgi-bin/nagios3/notifications.cgi?contact=all'.format(use_ssl,
-                                                                                         settings.NAGIOS_DOMAIN
-    resp, content = h.request()
-    # Only return content if we actually found something
-    if resp['status'] == '200':
-        return content
-    return None
-    #return open("/tmp/index.html").read()
+    nagios_url = settings.NAGIOS_DOMAIN
+    nagios_url += '/cgi-bin/nagios3/notifications.cgi'
+    nagios_url += '?contact=all&archive=0&type=0&oldestfirst=on'
+    password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    password_manager.add_password(None, nagios_url,
+                                  settings.NAGIOS_USERNAME,
+                                  settings.NAGIOS_PASSWORD)
+    auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
+    # Force it not to use a proxy
+    proxy_handler = urllib2.ProxyHandler({})
+    opener = urllib2.build_opener(auth_handler, proxy_handler)
+    urllib2.install_opener(opener)
+    page_handle = urllib2.urlopen(nagios_url)
+    req = urllib2.Request(nagios_url)
+    response = urllib2.urlopen(req)
+    output = response.read()
+    response.close()
+    return output
 
 def to_datetime(time_string):
     """

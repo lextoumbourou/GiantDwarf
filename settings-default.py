@@ -19,6 +19,6 @@ ALERT_ICONS = {'CRITICAL' :':scream:',
 FETCH_INTERVAL = 20
 
 # Nagios specific
-NAGIOS_DOMAIN   = 'WhereNagiosIs.com' # don't include http:// or /nagios unless it's non standard
+NAGIOS_DOMAIN   = 'http://WhereNagiosIs.com' # don't include /nagios unless it's non standard
 NAGIOS_USERNAME = ''
 NAGIOS_PASSWORD = ''
