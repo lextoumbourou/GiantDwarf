@@ -8,7 +8,7 @@ Usage
 * Run the silly thing in the background
 
 ```
-python giant_dwarf.py &
+python GiantDwarf.py &
 ```
 
 * See what's up in Campfire
@@ -21,7 +21,7 @@ Prereqs
 pip install BeautifulSoup
 ```
 
-* [Pinder](https://github.com/rhymes/pinder)
+* [PyFire](https://github.com/mariano/pyfire)
 
 License
 ------
