@@ -1,12 +1,13 @@
 #####################################################
-# Campfire config parameters
+# General config parameters
 #####################################################
 TOKEN     = ''
 SUBDOMAIN = ''
 ROOM      = ''
+USE_SSL   = True
 
 #####################################################
-# General plugin parameters
+# Plugin specific parameters
 #####################################################
 ALERT_ICONS = {'CRITICAL' :':scream:',
                'WARNING'  :':cold_sweat:',
@@ -15,10 +16,9 @@ ALERT_ICONS = {'CRITICAL' :':scream:',
                'HOST UP'  :':godmode:',}
 
 # How often should the bot perform checks 
-FETCH_INTERVAL = 60
+FETCH_INTERVAL = 20
 
 # Nagios specific
-NAGIOS_URL      = 'http://??/nagios'
-NAGIOS_USERNAME = 'nagiosadmin'
+NAGIOS_DOMAIN   = 'WhereNagiosIs.com'
+NAGIOS_USERNAME = ''
 NAGIOS_PASSWORD = ''
-
