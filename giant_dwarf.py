@@ -9,13 +9,14 @@ def open_page():
     """
     Return HTML content from a webpage as a string
     """
-    h = httplib2.Http(".cache")
-    h.add_credentials(settings.NAGIOS_USER, settings.NAGIOS_PASS)
-    resp, content = h.request(settings.NAGIOS_DOMAIN+'cgi-bin/nagios3/notifications.cgi?contact=all')
-    # Only return content if we actually found something
-    if resp['status'] == '200':
-        return content
-    return None
+    #h = httplib2.Http(".cache")
+    #h.add_credentials(settings.NAGIOS_USER, settings.NAGIOS_PASS)
+    #resp, content = h.request(settings.NAGIOS_DOMAIN+'cgi-bin/nagios3/notifications.cgi?contact=all')
+    ## Only return content if we actually found something
+    #if resp['status'] == '200':
+    #    return content
+    #return None
+    return open("/tmp/index.html").read()
 
 def get_nagios_events(html):
     """
