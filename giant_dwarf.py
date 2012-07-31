@@ -9,14 +9,13 @@ def open_page():
     """
     Return HTML content from a webpage as a string
     """
-    #h = httplib2.Http(".cache")
-    #h.add_credentials(settings.NAGIOS_USER, settings.NAGIOS_PASS)
-    #resp, content = h.request(settings.NAGIOS_DOMAIN+'cgi-bin/nagios3/notifications.cgi?contact=all')
-    ## Only return content if we actually found something
-    #if resp['status'] == '200':
-    #    return content
-    #return None
-    return open("/tmp/index.html").read()
+    h = httplib2.Http(".cache")
+    h.add_credentials(settings.NAGIOS_USER, settings.NAGIOS_PASS)
+    resp, content = h.request(settings.NAGIOS_DOMAIN+'cgi-bin/nagios3/notifications.cgi?contact=all')
+    # Only return content if we actually found something
+    if resp['status'] == '200':
+        return content
+    return None
 
 def get_nagios_events(html):
     """
@@ -97,6 +96,7 @@ def main(room):
 
         # We have a new last run time 
         last_run = nagios_events[-1]['time']
+        #print last_run
 
         # Rest!
         sleep(settings.FETCH_INTERVAL)
