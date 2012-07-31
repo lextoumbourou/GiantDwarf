@@ -4,13 +4,13 @@ A ridiculously simple Nagios bot for Campfire.
 
 Usage
 ----
-* Create **settings.py**.
+* Create **settings.py**
 
 ```
 cp settings-default.py settings.py
 ```
 
-* Configure **settings.py**.
+* Configure **settings.py**
 
 ```
 TOKEN     = 'abcdefghijklmnop'
