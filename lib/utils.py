@@ -19,7 +19,11 @@ def open_page():
     proxy_handler = urllib2.ProxyHandler({})
     opener = urllib2.build_opener(auth_handler, proxy_handler)
     urllib2.install_opener(opener)
-    page_handle = urllib2.urlopen(nagios_url)
+    try:
+        page_handle = urllib2.urlopen(nagios_url)
+    except HTTPError, e:
+        print "Connection to internal site failed ", e
+        return None
     req = urllib2.Request(nagios_url)
     response = urllib2.urlopen(req)
     output = response.read()
