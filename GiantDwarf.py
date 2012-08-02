@@ -13,9 +13,13 @@ def get_nagios_events(html):
     """
     output = []
     soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES)
-    trs = soup.find('table', 'notifications').findAll('tr')
-    if not trs:
+    try:
+        trs = soup.find('table', 'notifications').findAll('tr')
+    except AttributeError:
         # We didn't find anything, don't bother parsing it
+        return output
+
+    if not trs:
         return output
 
     for tr in trs[2:]:
@@ -93,3 +97,8 @@ if __name__ == '__main__':
             print "Okay, I'm leaving the room now"
             room.leave()
             exit()
+        except Exception, e:
+            # I don't want GiantDwarf dying over an exception
+            # this allows it to pass and try again next period
+            print "This just happened: ", e
+            continue
