@@ -78,21 +78,31 @@ def send_to_room(last_run, room):
     # We have a new last run time 
     return nagios_events[-1]['time']
         
-if __name__ == '__main__':
+def start_campfire():
+    """
+    Return a room object
+    """
     # Setup Campfire and join our room
-    c = Campfire(settings.SUBDOMAIN, settings.TOKEN, 'x', ssl=settings.USE_SSL)
-    room = c.get_room_by_name(settings.ROOM)
-    room.join()
+    c = Campfire(settings.SUBDOMAIN, 
+                 settings.TOKEN, 
+                 'x', 
+                 ssl=settings.USE_SSL)
+    return c.get_room_by_name(settings.ROOM)
 
+if __name__ == '__main__':
     # Ensure we don't get old Nagios events
     last_run = datetime.now()
     print "Online and ready"
+    is_connected = False
 
     while True:
+        if not is_connected: 
+            room = start_campfire()
+            room.join()
         try:
             last_run = send_to_room(last_run, room)
             print "Last run time ", last_run
-            sleep(settings.FETCH_INTERVAL)
+            is_connected = True
         except KeyboardInterrupt:
             print "Okay, I'm leaving the room now"
             room.leave()
@@ -101,4 +111,6 @@ if __name__ == '__main__':
             # I don't want GiantDwarf dying over an exception
             # this allows it to pass and try again next period
             print "This just happened: ", e
-            continue
+            is_connected = False
+
+        sleep(settings.FETCH_INTERVAL)
