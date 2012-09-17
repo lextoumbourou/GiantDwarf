@@ -106,7 +106,7 @@ if __name__ == '__main__':
             room.join()
         try:
             last_run = send_to_room(last_run, room)
-            logging.info("Ran successfully")
+            logging.info("Last message @ {0}".format(last_run))
             is_connected = True
         except KeyboardInterrupt:
             logging.info("Leaving the room")
