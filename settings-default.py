@@ -6,6 +6,9 @@ SUBDOMAIN = '' # Don't include .campfirenow.com
 ROOM      = '' 
 USE_SSL   = True
 
+# Logging
+LOG_FILE = '/var/log/giantdwarf.log'
+
 #####################################################
 # Plugin specific parameters
 #####################################################

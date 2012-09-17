@@ -5,6 +5,7 @@ from time import sleep
 from datetime import datetime
 from lib import utils
 import settings
+import logging
 
 def get_nagios_events(html):
     """
@@ -90,9 +91,13 @@ def start_campfire():
     return c.get_room_by_name(settings.ROOM)
 
 if __name__ == '__main__':
+    # Configure logging
+    logging.basicConfig(format="%(asctime)-15s %(message)s",
+                        filename=settings.LOG_FILE,
+                        level=logging.INFO)
     # Ensure we don't get old Nagios events
     last_run = datetime.now()
-    print "Online and ready"
+    logging.info("Online and ready")
     is_connected = False
 
     while True:
@@ -101,16 +106,16 @@ if __name__ == '__main__':
             room.join()
         try:
             last_run = send_to_room(last_run, room)
-            print "Last run time ", last_run
+            logging.info("Ran successfully")
             is_connected = True
         except KeyboardInterrupt:
-            print "Okay, I'm leaving the room now"
+            logging.info("Leaving the room")
             room.leave()
             exit()
         except Exception, e:
             # I don't want GiantDwarf dying over an exception
             # this allows it to pass and try again next period
-            print "This just happened: ", e
+            logging.warning("Exception occured: ", e)
             is_connected = False
 
         sleep(settings.FETCH_INTERVAL)
