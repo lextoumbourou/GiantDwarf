@@ -1,11 +1,13 @@
-from pyfire import Campfire
-from BeautifulSoup import BeautifulSoup
 from sys import exit
 from time import sleep
 from datetime import datetime
+import logging
+
+from pyfire import Campfire
+from BeautifulSoup import BeautifulSoup
+
 from lib import utils
 import settings
-import logging
 
 def get_nagios_events(html):
     """
