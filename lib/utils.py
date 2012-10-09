@@ -2,6 +2,7 @@ import urllib2
 import settings
 from datetime import datetime
 
+
 def open_page():
     """
     Return HTML content from a webpage as a string
@@ -30,6 +31,7 @@ def open_page():
     response.close()
     return output
 
+
 def to_datetime(time_string):
     """
     Simple wrapper for converting Nagios dates to
@@ -37,7 +39,3 @@ def to_datetime(time_string):
     """
     format_string = "%Y-%m-%d %H:%M:%S"
     return datetime.strptime(time_string, format_string)
-
-
-
-
