@@ -9,6 +9,7 @@ from BeautifulSoup import BeautifulSoup
 from lib import utils
 import settings
 
+
 def get_nagios_events(html):
     """
     Return latest Nagios event (based on last polling period)
@@ -39,12 +40,13 @@ def get_nagios_events(html):
         # Ignore pager notifications
         if contact.endswith('pager'):
             continue
-        output.append({'host'   : host,
+        output.append({'host': host,
                        'service': service,
-                       'level'  : level,
-                       'time'   : utils.to_datetime(time),
-                       'info'   : info})
+                       'level': level,
+                       'time': utils.to_datetime(time),
+                       'info': info})
     return output
+
 
 def send_to_room(last_run, room):
     """
@@ -64,7 +66,7 @@ def send_to_room(last_run, room):
             # Event is older then last event, skip
             continue
 
-        # Use Alien man if no icon has been defined for the event level 
+        # Use Alien man if no icon has been defined for the event level
         try:
             icon = settings.ALERT_ICONS[event['level']]
         except KeyError:
@@ -78,17 +80,18 @@ def send_to_room(last_run, room):
         # Say what the hell is going down!
         room.speak(msg)
 
-    # We have a new last run time 
+    # We have a new last run time
     return nagios_events[-1]['time']
-        
+
+
 def start_campfire():
     """
     Return a room object
     """
     # Setup Campfire and join our room
-    c = Campfire(settings.SUBDOMAIN, 
-                 settings.TOKEN, 
-                 'x', 
+    c = Campfire(settings.SUBDOMAIN,
+                 settings.TOKEN,
+                 'x',
                  ssl=settings.USE_SSL)
     return c.get_room_by_name(settings.ROOM)
 
@@ -103,7 +106,7 @@ if __name__ == '__main__':
     is_connected = False
 
     while True:
-        if not is_connected: 
+        if not is_connected:
             room = start_campfire()
             room.join()
         try:
