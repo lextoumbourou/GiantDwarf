@@ -11,6 +11,11 @@ from BeautifulSoup import BeautifulSoup
 import settings
 
 class GiantDwarf():
+    """
+    GiantDwarf class manages loading plugins and providing 
+    an interface for the pyfire class
+
+    """
     def __init__(self):
         self.plugins = []
         self.is_connected = False
