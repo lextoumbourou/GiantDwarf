@@ -8,6 +8,7 @@ import settings
 
 class Nagios(GiantDwarfPlugin):
     def __init__(self):
+        super(Nagios, self).__init__()
         self.last_run = datetime.now()
 
     def _open_page(self):
@@ -85,7 +86,7 @@ class Nagios(GiantDwarfPlugin):
         return output
 
 
-    def run(self, gd):
+    def run(self, room):
         """Send the event information to the Campfire room
         and return the last event's time
 
@@ -115,7 +116,7 @@ class Nagios(GiantDwarfPlugin):
                                                      event['host'],
                                                      event['info'])
             # Say what the hell is going down!
-            gd.room.speak(msg)
+            room.speak(msg)
 
         # We have a new last run time
         self.last_run = nagios_events[-1]['time']
