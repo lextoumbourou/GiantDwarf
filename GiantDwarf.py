@@ -16,8 +16,8 @@ class GiantDwarf():
     """
     GiantDwarf class manages loading plugins and providing 
     an interface for the pyfire class
-
     """
+
     def __init__(self):
         """
         Init method loads all the plugins preparing the class
@@ -28,6 +28,7 @@ class GiantDwarf():
         self.room = None;
 
         self._load_passive_plugins()
+        self._load_active_plugins()
 
         # Configure logging
         self.logging = logging
@@ -38,7 +39,9 @@ class GiantDwarf():
     
 
     def _get_class_name(self, mod_name):
-        """Return the class name from a plugin name"""
+        """
+        Return the class name from a plugin name
+        """
         output = ""
 
         # Split the _ and ignore the 1st word plugin
@@ -50,13 +53,19 @@ class GiantDwarf():
 
         return output
 
+
     def _load_passive_plugins(self):
+        """
+        Iterate through the plugin directory and attempt to load all those
+        plugins that begin with plugin_passive_
+        """
         path = os.path.join(os.path.dirname(__file__), 'plugins')
         modules = pkgutil.iter_modules(path=[path])
 
         for loader, mod_name, ispkg in modules:
             # Ensure that module isn't already loaded
-            if mod_name not in sys.modules:
+            if (mod_name not in sys.modules and 
+                mod_name.startswith('passive')):
                 # import module
                 loaded_mod = __import__(path+"."+mod_name, fromlist=[mod_name])
 
@@ -66,6 +75,29 @@ class GiantDwarf():
 
                 # create an instance of the class
                 self.passive_plugins.append(loaded_class())
+
+    def _load_active_plugins(self):
+        """
+        Iterate through the plugin directory and attempt to load all those
+        plugins that begin with plugin_passive_
+        """
+        path = os.path.join(os.path.dirname(__file__), 'plugins')
+        modules = pkgutil.iter_modules(path=[path])
+
+        for loader, mod_name, ispkg in modules:
+            # Ensure that module isn't already loaded
+            if (mod_name not in sys.modules and 
+                mod_name.startswith('active')):
+                # import module
+                loaded_mod = __import__(path+"."+mod_name, fromlist=[mod_name])
+
+                # load class from imported module
+                class_name = self._get_class_name(mod_name)
+                loaded_class = getattr(loaded_mod, class_name)
+
+                # create an instance of the class
+                self.active_plugins[mod_name] = loaded_class()
+
 
     def _start_campfire(self):
         """
@@ -86,30 +118,33 @@ class GiantDwarf():
 
 
     def _process_messages(self, message):
-        """Handles processing data sent from the room"""
+        """
+        Handles processing data sent from the room
+        """
         user = ""
         if message.is_text():
             if message.body.startswith(GD_NAMES):
                 try:
                     body = message.body.split(" ")
-                    plugin_name = body[1]
-                    data = body[1:]
-                    try:
-                        self.active_plugins[plugin_name].run(data)
-                    except KeyError:
-                        pass
-                    reply = "Plugin to call is " + plugin_name
-                    reply += " data is " + " ".join(data)
+                    data = []
+                    if len(body) > 1:
+                        plugin_name = body[1]
+
+                    if len(body) > 2:
+                        data = body[2:]
+                    reply = plugin_name
+                    #try:
+                    self.active_plugins["active_"+plugin_name].run(data, self.room)
+                    #except KeyError:
+                    #    pass
                 except IndexError:
                     reply = "Erm...what?"
 
-                self.room.speak(reply)
-
 
     def start(self):
-        """Main function that handles starting Campfire and 
+        """
+        Main function that handles starting Campfire and 
         running passive checks
-        
         """
         self.last_run = datetime.now()
         self.logging.info("Online and ready")
@@ -149,7 +184,9 @@ class GiantDwarfPlugin(object):
         self.interval = settings.FETCH_INTERVAL
 
     def should_run(self):
-        """Determine if plugin should be run based on interval settings"""
+        """
+        Determine if plugin should be run based on interval settings
+        """
         try:
             self.interim_interval += 1
         except AttributeError:
