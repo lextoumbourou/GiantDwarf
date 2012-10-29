@@ -37,23 +37,27 @@ class GiantDwarf():
                 level=logging.INFO)
 
 
+    def _load_class(self, plugin, class_name):
+        """
+        Return a class for instantiation from a module name
+        """
+        loaded_mod = __import__(plugin, fromlist=[plugin])
+        return getattr(loaded_mod, class_name)
+
     def _load_plugins(self):
         """
         Load all plugins defined in the settings file populating the 
-        self.active_plugins and self.passive_plugins attribute
+        self.active_plugins and self.passive_plugins attributes
         """
         # Load passive plugins into a list
         for plugin, class_name in settings.PASSIVE_PLUGINS:
-            # import module
-            loaded_mod = __import__(plugin, fromlist=[plugin])
-            loaded_class = getattr(loaded_mod, class_name)
+            loaded_class = self._load_class(plugin, class_name)
             # create an instance of the class
             self.passive_plugins.append(loaded_class())
 
         # Load active plugins into a dict
         for plugin, class_name in settings.ACTIVE_PLUGINS:
-            loaded_mod = __import__(plugin, fromlist=[plugin])
-            loaded_class = getattr(loaded_mod, class_name)
+            loaded_class = self._load_class(plugin, class_name) 
             # Just get the module name for use in the active plugin key
             module = plugin.split('.')[-1]
             # create an instance of the class
@@ -94,11 +98,10 @@ class GiantDwarf():
                     if len(body) > 2:
                         data = body[2:]
                     reply = plugin_name
-                    print plugin_name
-                    #try:
-                    self.active_plugins[plugin_name].run(data, self.room)
-                    #except KeyError:
-                    #    self.room.speak("Hmmm...I don't know what that means...")
+                    try:
+                        self.active_plugins[plugin_name].run(data, self.room)
+                    except KeyError:
+                        self.room.speak("Hmmm...I don't know what that means...")
                 except IndexError:
                     reply = "Erm...what?"
 
