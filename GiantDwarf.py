@@ -3,6 +3,7 @@ from datetime import datetime
 import sys
 import pkgutil
 import os
+import re
 import logging
 
 from pyfire import Campfire
@@ -26,9 +27,7 @@ class GiantDwarf():
         self.active_plugins = {}
         self.is_connected = False
         self.room = None;
-
-        self._load_passive_plugins()
-        self._load_active_plugins()
+        self.message_re = re.compile('\S+\s+(?P<plugin>\S+)\s+(?P<action>\S+)\s+(?P<data>.*)')
 
         # Configure logging
         self.logging = logging
@@ -74,7 +73,7 @@ class GiantDwarf():
                 loaded_class = getattr(loaded_mod, class_name)
 
                 # create an instance of the class
-                self.passive_plugins.append(loaded_class())
+                self.passive_plugins.append(loaded_class(self.room))
 
     def _load_active_plugins(self):
         """
@@ -96,21 +95,23 @@ class GiantDwarf():
                 loaded_class = getattr(loaded_mod, class_name)
 
                 # create an instance of the class
-                self.active_plugins[mod_name] = loaded_class()
+                self.active_plugins[mod_name] = loaded_class(self.room)
 
 
     def _start_campfire(self):
         """
-        Return a room object
+        Connect to campfire and load plugins
         """
         # Setup Campfire and join our room
-        c = Campfire(settings.SUBDOMAIN,
-                     settings.TOKEN,
-                     'x',
+        c = Campfire(settings.SUBDOMAIN, settings.TOKEN, 'x',
                      ssl=settings.USE_SSL)
         self.is_connected = True
         self.room = c.get_room_by_name(settings.ROOM)
         self.room.join()
+
+        # Load the plugins
+        self._load_passive_plugins()
+        self._load_active_plugins()
 
         # Attach to active stream 
         stream = self.room.get_stream(live=False)
@@ -125,16 +126,20 @@ class GiantDwarf():
         if message.is_text():
             if message.body.startswith(GD_NAMES):
                 try:
-                    body = message.body.split(" ")
-                    data = []
-                    if len(body) > 1:
-                        plugin_name = body[1]
+                    
+                    message = self.message_re.match(message.body)
+                    
+                    plugin = message.group('plugin')
+                    action = message.group('action')
+                    data = message.group('data')
 
-                    if len(body) > 2:
-                        data = body[2:]
-                    reply = plugin_name
+                    self.room.speak('i got plugin ' + plugin)
+                    self.room.speak('i got action ' + action)
+                    self.room.speak('i got data ' + data)
+                    reply = plugin
+                    
                     #try:
-                    self.active_plugins["active_"+plugin_name].run(data, self.room)
+                    self.active_plugins["active_" + plugin].run(action, data)
                     #except KeyError:
                     #    pass
                 except IndexError:
@@ -153,13 +158,14 @@ class GiantDwarf():
             if not self.is_connected:
                 self._start_campfire()
                 self.logging.info("Attached and ready to roll!")
+                self.room.speak('Attached and ready to roll!')
             try:
                 self.last_run = datetime.now()
                 # Run passive checks
                 for plugin in self.passive_plugins:
                     if plugin.should_run():
                         self.logging.debug("Running plugin " + str(plugin)) 
-                        plugin.run(self.room)
+                        plugin.run()
 
                 self.logging.info("Last message @ {0}".format(self.last_run))
             except KeyboardInterrupt:
@@ -179,9 +185,21 @@ class GiantDwarfPlugin(object):
     """
     Each passive plugin should be a subclass of this
     """
-    def __init__(self):
+    def __init__(self, room):
         # Can be overwritten by subclasses to change interval
         self.interval = settings.FETCH_INTERVAL
+        self._room = room
+        self.create()
+
+    def create(self):
+        """
+        The user-friendly constructor which plugins may override to perform
+        initial tasks required by the plugin
+        """
+        pass
+
+    def speak(self, data):
+        self._room.speak(data)
 
     def should_run(self):
         """
@@ -198,8 +216,7 @@ class GiantDwarfPlugin(object):
 
         return False
 
-
-    def run(self):
+    def run(self, action, data):
         pass
 
 
