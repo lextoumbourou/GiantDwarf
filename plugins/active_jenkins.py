@@ -12,22 +12,22 @@ class Jenkins(GiantDwarfPlugin):
         self.jenkins_url = settings.JENKINS_DOMAIN
 
     def _list_jobs_like(self, search=''):
-        output = [] 
+        output = "" 
         url = self.jenkins_url + "/api/json"
         raw_data = utils.open_page(url)
         data = json.loads(raw_data)
         for job in data['jobs']:
             if search in job['name']:
-                output.append(job['name'] + " status: " + job['color'])
+                output += "{0} -- Status: {1}\n".format(job['name'], job['color'])
 
-        return output
+        return [output]
 
     def _get_last_build(self, job):
-        output = []
+        output = ""
         url = self.jenkins_url + "/job/" + job + "/api/json/"
         raw_data = utils.open_page(url)
         if not raw_data:
-            return ["Couldn't find that job"]
+            return "Couldn't find that job"
 
         data = json.loads(raw_data)
         last_build = data['lastBuild']['number']
@@ -38,31 +38,34 @@ class Jenkins(GiantDwarfPlugin):
         if data:
             change_set = data['changeSet']['items']
             try:
-                output.append("Author: " + change_set[0]["author"]["fullName"])
+                output += "Author: {0}\n".format(change_set[0]["author"]["fullName"])
             except IndexError, KeyError:
                 pass
 
             try:
-                output.append("Result: " + data['result'])
+                output += "Result: {0}\n".format(data['result'])
             except IndexError, KeyError:
                 pass
 
             try:
-                output.append("Msg: " + change_set[0]["msg"])
+                output += "Msg: {0}\n".format(change_set[0]["msg"])
             except IndexError, KeyError:
                 pass
 
             try:
-                output.append("Commit: " + change_set[0]["commitId"])
+                output += "Commit: {0}\n".format(change_set[0]["commitId"])
             except IndexError, KeyError:
                 pass
 
             try:
-                output.append("Last artifact: " + data['artifacts'][-1]['fileName'])
+                output += "Artifacts: \n"
+                for artifact in data['artifacts']:
+                    output += artifact['fileName'] + "\n"
             except IndexError, KeyError:
                 pass
 
-        return output
+        return [output]
+
 
     def _start_build(self, job):
         url = self.jenkins_url + "/job/{0}/build?token={1}".format(
@@ -74,6 +77,7 @@ class Jenkins(GiantDwarfPlugin):
         cmds = ["/usr/bin/wget", "--spider", "--auth-no-challenge",
                 "--http-user="+settings.JENKINS_USER, 
                 "--http-password="+settings.JENKINS_PASSWORD,
+                "--no-proxy",
                url]
         try:
             subprocess.call(cmds, shell=False)
@@ -82,20 +86,25 @@ class Jenkins(GiantDwarfPlugin):
         else:
             output = "Build started"
 
-        return output
+        return [output]
 
     def run(self, data, room):
         output = []
         if " ".join(data).startswith("last"):
-            if data < 1: 
+            if len(data) > 1: 
                 jobname = data[1]
-                room.speak("Okay, cool I'll get the build for " + jobname)
-            output = self._get_last_build(jobname)
+                output = self._get_last_build(jobname)
+            else:
+                output.append("Please specify a job")
         elif " ".join(data).startswith("jobs like"):
             search = data[2]
             output = self._list_jobs_like(search)
         elif " ".join(data).startswith("build"):
-            pass
+            if len(data) > 1: 
+                jobname = data[1]
+                output = self._start_build(jobname)
+            else:
+                output.append("Please specify a job")
 
         if output:
             for out in output:
@@ -106,7 +115,7 @@ class Jenkins(GiantDwarfPlugin):
 
 if __name__ == '__main__':
     jenkins = Jenkins()
-    print jenkins._list_jobs_like("bpl-www")
-    #job = "bpl-www-site-php5"
-    #print jenkins._get_last_build(job)
+    #print jenkins._list_jobs_like("bpl-www")
+    job = "bpl-www-site-php5"
+    print jenkins._get_last_build(job)
     #print jenkins._start_build("bpl-www-site-php5")
