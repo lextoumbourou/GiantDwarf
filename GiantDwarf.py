@@ -73,10 +73,7 @@ class GiantDwarf():
         self.is_connected = True
         self.room = c.get_room_by_name(settings.ROOM)
         self.room.join()
-
-        # Load the plugins
-        self._load_passive_plugins()
-        self._load_active_plugins()
+        self._load_plugins()
 
         # Attach to active stream 
         stream = self.room.get_stream(live=False)
@@ -90,24 +87,15 @@ class GiantDwarf():
         user = ""
         if message.is_text():
             if message.body.startswith(GD_NAMES):
+                message = self.message_re.match(message.body)
+                plugin = message.group('plugin')
+                action = message.group('action')
+                data = message.group('data')
+                
                 try:
-                    message = self.message_re.match(message.body)
-                    
-                    plugin = message.group('plugin')
-                    action = message.group('action')
-                    data = message.group('data')
-
-                    self.room.speak('i got plugin ' + plugin)
-                    self.room.speak('i got action ' + action)
-                    self.room.speak('i got data ' + data)
-                    reply = plugin
-                    
-                    try:
-                        self.active_plugins[plugin].run(action, data)
-                    except KeyError:
-                        self.room.speak('Unable to find plugin ' + plugin)
-                except IndexError:
-                    reply = "Erm...what?"
+                    self.active_plugins[plugin].run(action, data)
+                except KeyError:
+                    self.room.speak('Unable to find plugin ' + plugin)
 
 
     def start(self):
