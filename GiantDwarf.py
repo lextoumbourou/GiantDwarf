@@ -18,7 +18,6 @@ class GiantDwarf():
     GiantDwarf class manages loading plugins and providing 
     an interface for the pyfire class
     """
-
     def __init__(self):
         """
         Init method loads all the plugins preparing the class
@@ -35,7 +34,6 @@ class GiantDwarf():
                 format="%(asctime)-15s %(message)s",
                 filename=settings.LOG_FILE,
                 level=logging.INFO)
-
 
     def _load_class(self, plugin, class_name):
         """
@@ -79,7 +77,6 @@ class GiantDwarf():
         stream = self.room.get_stream(live=False)
         stream.attach(self._process_messages).start()
 
-
     def _process_messages(self, message):
         """
         Handles processing data sent from the room
@@ -96,7 +93,6 @@ class GiantDwarf():
                     self.active_plugins[plugin].run(action, data)
                 except KeyError:
                     self.room.speak('Unable to find plugin ' + plugin)
-
 
     def start(self):
         """

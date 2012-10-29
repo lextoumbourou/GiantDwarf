@@ -5,7 +5,6 @@ from GiantDwarf import GiantDwarfPlugin
 from lib import utils
 import settings
 
-
 class Jenkins(GiantDwarfPlugin):
     def create(self):
         self.jenkins_url = settings.JENKINS_DOMAIN
@@ -64,7 +63,6 @@ class Jenkins(GiantDwarfPlugin):
                 pass
 
         return [output]
-
 
     def _start_build(self, job):
         url = self.jenkins_url + "/job/{0}/build?token={1}".format(

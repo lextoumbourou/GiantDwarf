@@ -58,7 +58,6 @@ class Nagios(GiantDwarfPlugin):
                            'info': info})
         return output
 
-
     def run(self):
         """
         Send the event information to the Campfire room
