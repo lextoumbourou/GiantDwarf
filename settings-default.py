@@ -9,6 +9,22 @@ USE_SSL   = True
 # Logging
 LOG_FILE = '/var/log/giantdwarf.log'
 
+######################################################
+# Plugins
+######################################################
+
+# Passive plugins are called periodically and can only send data to the room.
+# Should be a list of tuples in format: ('module.name', 'ClassName')
+PASSIVE_PLUGINS = [
+    ('plugins.nagios', 'Nagios'),
+]
+
+# Active plugins are called with commands from the room
+# Should be a list of tuples in format: ('module.name', 'ClassName')
+ACTIVE_PLUGINS = [
+    ('plugins.jenkins', 'Jenkins'),
+]
+
 #####################################################
 # Plugin specific parameters
 #####################################################
