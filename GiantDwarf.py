@@ -27,8 +27,7 @@ class GiantDwarf():
         self.is_connected = False
         self.room = None;
 
-        self._load_passive_plugins()
-        self._load_active_plugins()
+        self._load_plugins()
 
         # Configure logging
         self.logging = logging
@@ -36,67 +35,29 @@ class GiantDwarf():
                 format="%(asctime)-15s %(message)s",
                 filename=settings.LOG_FILE,
                 level=logging.INFO)
-    
 
-    def _get_class_name(self, mod_name):
+
+    def _load_plugins(self):
         """
-        Return the class name from a plugin name
+        Load all plugins defined in the settings file populating the 
+        self.active_plugins and self.passive_plugins attribute
         """
-        output = ""
+        # Load passive plugins into a list
+        for plugin, class_name in settings.PASSIVE_PLUGINS:
+            # import module
+            loaded_mod = __import__(plugin, fromlist=[plugin])
+            loaded_class = getattr(loaded_mod, class_name)
+            # create an instance of the class
+            self.passive_plugins.append(loaded_class())
 
-        # Split the _ and ignore the 1st word plugin
-        words = mod_name.split('_')[1:]
-
-        # Capitalise the first letter of each word and add to string
-        for word in words:
-            output += word.title()
-
-        return output
-
-
-    def _load_passive_plugins(self):
-        """
-        Iterate through the plugin directory and attempt to load all those
-        plugins that begin with plugin_passive_
-        """
-        path = os.path.join(os.path.dirname(__file__), 'plugins')
-        modules = pkgutil.iter_modules(path=[path])
-
-        for loader, mod_name, ispkg in modules:
-            # Ensure that module isn't already loaded
-            if (mod_name not in sys.modules and 
-                mod_name.startswith('passive')):
-                # import module
-                loaded_mod = __import__(path+"."+mod_name, fromlist=[mod_name])
-
-                # load class from imported module
-                class_name = self._get_class_name(mod_name)
-                loaded_class = getattr(loaded_mod, class_name)
-
-                # create an instance of the class
-                self.passive_plugins.append(loaded_class())
-
-    def _load_active_plugins(self):
-        """
-        Iterate through the plugin directory and attempt to load all those
-        plugins that begin with plugin_passive_
-        """
-        path = os.path.join(os.path.dirname(__file__), 'plugins')
-        modules = pkgutil.iter_modules(path=[path])
-
-        for loader, mod_name, ispkg in modules:
-            # Ensure that module isn't already loaded
-            if (mod_name not in sys.modules and 
-                mod_name.startswith('active')):
-                # import module
-                loaded_mod = __import__(path+"."+mod_name, fromlist=[mod_name])
-
-                # load class from imported module
-                class_name = self._get_class_name(mod_name)
-                loaded_class = getattr(loaded_mod, class_name)
-
-                # create an instance of the class
-                self.active_plugins[mod_name] = loaded_class()
+        # Load active plugins into a dict
+        for plugin, class_name in settings.ACTIVE_PLUGINS:
+            loaded_mod = __import__(plugin, fromlist=[plugin])
+            loaded_class = getattr(loaded_mod, class_name)
+            # Just get the module name for use in the active plugin key
+            module = plugin.split('.')[-1]
+            # create an instance of the class
+            self.active_plugins[module] = loaded_class()
 
 
     def _start_campfire(self):
@@ -133,10 +94,11 @@ class GiantDwarf():
                     if len(body) > 2:
                         data = body[2:]
                     reply = plugin_name
+                    print plugin_name
                     #try:
-                    self.active_plugins["active_"+plugin_name].run(data, self.room)
+                    self.active_plugins[plugin_name].run(data, self.room)
                     #except KeyError:
-                    #    pass
+                    #    self.room.speak("Hmmm...I don't know what that means...")
                 except IndexError:
                     reply = "Erm...what?"
 
