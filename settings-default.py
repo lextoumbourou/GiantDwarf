@@ -23,6 +23,7 @@ PASSIVE_PLUGINS = [
 # Should be a list of tuples in format: ('module.name', 'ClassName')
 ACTIVE_PLUGINS = [
     ('plugins.jenkins', 'Jenkins'),
+    ('plugins.say', 'Say'),
 ]
 
 #####################################################
