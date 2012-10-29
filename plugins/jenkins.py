@@ -7,8 +7,7 @@ import settings
 
 
 class Jenkins(GiantDwarfPlugin):
-    def __init__(self):
-        super(Jenkins, self).__init__()
+    def create(self):
         self.jenkins_url = settings.JENKINS_DOMAIN
 
     def _list_jobs_like(self, search=''):
@@ -88,29 +87,29 @@ class Jenkins(GiantDwarfPlugin):
 
         return [output]
 
-    def run(self, data, room):
+    def run(self, action, data):
         output = []
-        if " ".join(data).startswith("last"):
-            if len(data) > 1: 
-                jobname = data[1]
+        if action == 'last':
+            if data:
+                jobname = data
                 output = self._get_last_build(jobname)
             else:
                 output.append("Please specify a job")
-        elif " ".join(data).startswith("jobs like"):
-            search = data[2]
+        elif action == 'jobs':
+            search = data
             output = self._list_jobs_like(search)
-        elif " ".join(data).startswith("build"):
-            if len(data) > 1: 
-                jobname = data[1]
+        elif action == 'build':
+            if data: 
+                jobname = data
                 output = self._start_build(jobname)
             else:
                 output.append("Please specify a job")
 
         if output:
             for out in output:
-                room.speak(out)
+                self.speak(out)
         else:
-            room.speak("Dunno what you mean sorry.")
+            self.speak("Dunno what you mean sorry.")
 
 
 if __name__ == '__main__':
