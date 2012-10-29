@@ -7,8 +7,7 @@ import settings
 from lib import utils
 
 class Nagios(GiantDwarfPlugin):
-    def __init__(self):
-        super(Nagios, self).__init__()
+    def create(self):
         self.last_run = datetime.now()
         self.nagios_url = settings.NAGIOS_DOMAIN
         self.nagios_url += '/cgi-bin/nagios3/notifications.cgi'
@@ -60,7 +59,7 @@ class Nagios(GiantDwarfPlugin):
         return output
 
 
-    def run(self, room):
+    def run(self):
         """
         Send the event information to the Campfire room
         and return the last event's time
@@ -92,7 +91,7 @@ class Nagios(GiantDwarfPlugin):
                                                      event['host'],
                                                      event['info'])
             # Say what the hell is going down!
-            room.speak(msg)
+            self.speak(msg)
 
         # We have a new last run time
         self.last_run = nagios_events[-1]['time']
