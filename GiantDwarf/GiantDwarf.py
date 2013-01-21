@@ -14,6 +14,14 @@ import settings
 GD_NAMES = ("GiantDwarf", "GD", "gd")
 
 
+def load_class(plugin, class_name):
+    """
+    Return a class for instantiation from a module name
+    """
+    loaded_mod = __import__(plugin, fromlist=[plugin])
+    return getattr(loaded_mod, class_name)
+
+
 class GiantDwarf():
     """
     GiantDwarf class manages loading plugins and providing
@@ -37,13 +45,7 @@ class GiantDwarf():
             filename=settings.LOG_FILE,
             level=logging.INFO)
 
-    def _load_class(self, plugin, class_name):
-        """
-        Return a class for instantiation from a module name
-        """
-        loaded_mod = __import__(plugin, fromlist=[plugin])
-        return getattr(loaded_mod, class_name)
-
+    
     def _load_plugins(self):
         """
         Load all plugins defined in the settings file populating the
@@ -51,7 +53,7 @@ class GiantDwarf():
         """
         # Load passive plugins into a list
         for plugin, class_name in settings.PASSIVE_PLUGINS:
-            loaded_class = self._load_class(plugin, class_name)
+            loaded_class = load_class(plugin, class_name)
             # create an instance of the class
             self.passive_plugins.append(loaded_class(self.room))
 
