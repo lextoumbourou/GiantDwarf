@@ -115,7 +115,7 @@ class GiantDwarf():
                         self.logging.debug("Running plugin " + str(plugin)) 
                         plugin.run()
 
-                self.logging.info("Last message @ {0}".format(self.last_run))
+                self.logging.debug("Last message @ {0}".format(self.last_run))
             except KeyboardInterrupt:
                 self.logging.info("Leaving the room")
                 self.room.leave()
