@@ -59,7 +59,7 @@ class GiantDwarf():
 
         # Load active plugins into a dict
         for plugin, class_name in settings.ACTIVE_PLUGINS:
-            loaded_class = self._load_class(plugin, class_name)
+            loaded_class = load_class(plugin, class_name)
             # Just get the module name for use in the active plugin key
             module = plugin.split('.')[-1]
             # create an instance of the class
