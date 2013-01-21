@@ -128,7 +128,6 @@ class GiantDwarf():
                 # I don't want GiantDwarf dying over an exception
                 # this allows it to pass and try again next period
                 self.logging.warning("Exception occured: " + e)
-                self.is_connected = False
 
             sleep(1)
 
