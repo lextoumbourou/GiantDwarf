@@ -117,12 +117,14 @@ class GiantDwarf():
         """
         # Load passive plugins into a list
         for class_name, plugin in self.config.items('Passive Plugins'):
+            plugin = 'GiantDwarf.{0}'.format(plugin)
             loaded_class = load_class(plugin, class_name)
             # create an instance of the class
             self.passive_plugins.append(loaded_class(self.room, self.config))
 
         # Load active plugins into a dict
         for class_name, plugin in self.config.items('Active Plugins'):
+            plugin = 'GiantDwarf.{0}'.format(plugin)
             loaded_class = load_class(plugin, class_name)
             # Just get the module name for use in the active plugin key
             module = plugin.split('.')[-1]
