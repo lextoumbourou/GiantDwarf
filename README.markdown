@@ -17,7 +17,7 @@ lex@server:~/src$ cd GiantDwarf
 lex@server:~/src/GiantDwarf$ sudo python setup.py install 
 ```
 
-* Copy the example-giantdwarf.conf to /etc/giantdwarf/giantdwarf.conf or to ~/.giantdwarf.conf and configure.
+* Copy the example-giantdwarf.conf to **/etc/giantdwarf/giantdwarf.conf** or to **~/.giantdwarf.conf** and configure.
 
 ```
 # API authentication token (found under My Info in Campfire)
