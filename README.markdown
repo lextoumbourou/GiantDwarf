@@ -4,17 +4,16 @@ A simple Campfire bot written in Python
 
 Usage
 ----
-* Create **settings.py**
+* Copy the example-giantdwarf.conf to /etc/giantdwarf/ or to ~/.giantdwarf.conf
+
+* Configure **giantdwarf.conf**
 
 ```
-cp settings-default.py settings.py
-```
+# API authentication token (found under My Info in Campfire)
+token: 'abcdefghijklmnop'
 
-* Configure **settings.py**
-
-```
-TOKEN     = 'abcdefghijklmnop'
-SUBDOMAIN = 'WeBuiltItButHeWontCome' # don't include .campfirenow.com 
+# Part of domain before .campfire.com
+subdomain: 'WeBuiltItButHeWontCome' # don't include .campfirenow.com 
 ...
 ```
 
@@ -22,6 +21,25 @@ SUBDOMAIN = 'WeBuiltItButHeWontCome' # don't include .campfirenow.com
 
 ```
 python GiantDwarf.py &
+```
+
+* Or, as an upstart job
+
+```
+lex@server:~$ cat /etc/init/giantdwarf.conf
+# Start GiantDwarf
+#
+
+description "Start GiantDwarf server"
+
+start on startup
+
+script
+    python GiantDwarf.py
+end script
+
+lex@server:~$ sudo start giantdwarf
+giantdwarf start/running, process 6834
 ```
 
 * See what's up in Campfire
@@ -34,7 +52,9 @@ Prereqs
 pip install BeautifulSoup
 ```
 
-* [PyFire](https://github.com/mariano/pyfire)
+* [PyFire](https://github.com/fgimian/pyfire)
+Note: Unfortunately, at this stage it relies on @fgimian's fork of Pyfire due to the way
+transactional streaming is handled in the main repo
 
 License
 ------
