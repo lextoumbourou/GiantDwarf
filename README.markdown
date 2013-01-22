@@ -17,7 +17,7 @@ lex@server:~/src$ cd GiantDwarf
 lex@server:~/src/GiantDwarf$ sudo python setup.py install 
 ```
 
-* Copy the example-giantdwarf.conf to /etc/giantdwarf/ or to ~/.giantdwarf.conf and configure.
+* Copy the example-giantdwarf.conf to /etc/giantdwarf/giantdwarf.conf or to ~/.giantdwarf.conf and configure.
 
 ```
 # API authentication token (found under My Info in Campfire)
@@ -33,7 +33,7 @@ Usage
 * Run in the background
 
 ```
-lex@server:~$ python GiantDwarf.py &
+lex@server:~$ python giantdwarf.py &
 ```
 
 * Or, as an upstart job
@@ -48,7 +48,7 @@ description "Start GiantDwarf server"
 start on startup
 
 script
-    python GiantDwarf.py
+    python giantdwarf.py
 end script
 
 lex@server:~$ sudo start giantdwarf
