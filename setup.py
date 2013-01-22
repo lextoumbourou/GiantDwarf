@@ -9,5 +9,5 @@ setup(name='GiantDwarf',
       author_email='lextoumbourou@gmail.com',
       url='http://github.com/lextoumbourou/GiantDwarf',
       requires=['BeautifulSoup'],
-      packages=['GiantDwarf'],
+      packages=['GiantDwarf', 'GiantDwarf.plugins', 'GiantDwarf.lib'],
       scripts=['bin/giantdwarf.py'],)
