@@ -1,14 +1,11 @@
 from time import sleep
 from datetime import datetime
-import sys
-import pkgutil
 import os
 import re
 import logging
 import ConfigParser
 
 from pyfire import Campfire
-from BeautifulSoup import BeautifulSoup
 
 GD_NAMES = ('GiantDwarf', 'giantdwarf', 'GD', 'gd')
 
@@ -31,7 +28,7 @@ def load_config():
     4. Location specified in the GIANTDWARF_CONF environment variable
     Variables in configs found later will overwrite those found earlier
     """
-    config = RawConfigParserUpper()
+    output_config = RawConfigParserUpper()
 
     for location in (
             os.curdir, "/etc/giantdwarf/",
@@ -39,10 +36,10 @@ def load_config():
         if location:
             try:
                 with open(os.path.join(location, "giantdwarf.conf")) as source:
-                    config.readfp(source)
+                    output_config.readfp(source)
             except IOError:
                 pass
-    return config
+    return output_config
 
 
 def parse_config():
@@ -122,7 +119,7 @@ class GiantDwarf():
         for class_name, plugin in self.config.items('Passive Plugins'):
             loaded_class = load_class(plugin, class_name)
             # create an instance of the class
-            self.passive_plugins.append(loaded_class(self.room, config))
+            self.passive_plugins.append(loaded_class(self.room, self.config))
 
         # Load active plugins into a dict
         for class_name, plugin in self.config.items('Active Plugins'):
@@ -130,7 +127,7 @@ class GiantDwarf():
             # Just get the module name for use in the active plugin key
             module = plugin.split('.')[-1]
             # create an instance of the class
-            self.active_plugins[module] = loaded_class(self.room, config)
+            self.active_plugins[module] = loaded_class(self.room, self.config)
 
     def _start_campfire(self):
         """
@@ -155,7 +152,6 @@ class GiantDwarf():
         """
         Handles processing data sent from the room
         """
-        user = ""
         if message.is_text():
             if message.body.startswith(GD_NAMES):
                 message = self.message_re.match(message.body)
@@ -173,7 +169,7 @@ class GiantDwarf():
         Main function that handles starting Campfire and
         running passive checks
         """
-        self.last_run = datetime.now()
+        last_run = datetime.now()
         self.logging.info("Online and ready")
 
         while True:
@@ -181,22 +177,22 @@ class GiantDwarf():
                 self._start_campfire()
                 self.logging.info("Attached and ready to roll!")
             try:
-                self.last_run = datetime.now()
+                last_run = datetime.now()
                 # Run passive checks
                 for plugin in self.passive_plugins:
                     if plugin.should_run():
                         self.logging.debug("Running plugin " + str(plugin))
                         plugin.run()
 
-                self.logging.debug("Last message @ {0}".format(self.last_run))
+                self.logging.debug("Last message @ {0}".format(last_run))
             except KeyboardInterrupt:
                 self.logging.info("Leaving the room")
                 self.room.leave()
                 exit()
-            except Exception, e:
+            except Exception as error:
                 # I don't want GiantDwarf dying over an exception
                 # this allows it to pass and try again next period
-                self.logging.warning("Exception occured: " + e)
+                self.logging.warning("Exception occured: " + error)
 
             sleep(1)
 
@@ -241,10 +237,13 @@ class GiantDwarfPlugin(object):
         pass
 
 
-if __name__ == '__main__':
+def main():
     config = parse_config()
     if not config:
         exit()
 
-    gd = GiantDwarf(config)
-    gd.start()
+    giant_dwarf = GiantDwarf(config)
+    giant_dwarf.start()
+
+if __name__ == '__main__':
+    main()
