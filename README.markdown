@@ -1,12 +1,23 @@
 GiantDwarf
 =========
-A simple Campfire bot written in Python
+A simple Campfire bot written in Python 
 
-Usage
-----
-* Copy the example-giantdwarf.conf to /etc/giantdwarf/ or to ~/.giantdwarf.conf
+Installation
+------------
+* Clone the repo
 
-* Configure **giantdwarf.conf**
+```
+lex@server:~/src$ git clone git@github.com:lextoumbourou/GiantDwarf.git
+```
+
+* Install via **setup.py**
+
+```
+lex@server:~/src$ cd GiantDwarf
+lex@server:~/src/GiantDwarf$ sudo python setup.py install 
+```
+
+* Copy the example-giantdwarf.conf to /etc/giantdwarf/ or to ~/.giantdwarf.conf and configure.
 
 ```
 # API authentication token (found under My Info in Campfire)
@@ -17,10 +28,12 @@ subdomain: 'WeBuiltItButHeWontCome' # don't include .campfirenow.com
 ...
 ```
 
-* Run the silly thing in the background
+Usage
+-----
+* Run in the background
 
 ```
-python GiantDwarf.py &
+lex@server:~$ python GiantDwarf.py &
 ```
 
 * Or, as an upstart job
@@ -43,6 +56,11 @@ giantdwarf start/running, process 6834
 ```
 
 * See what's up in Campfire
+
+
+Plugin Development
+-----------------
+* Coming soon
 
 Prereqs
 ------
