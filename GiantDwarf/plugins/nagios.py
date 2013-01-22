@@ -3,13 +3,19 @@ from datetime import datetime
 from BeautifulSoup import BeautifulSoup
 
 from GiantDwarf import GiantDwarfPlugin
-import settings
 from lib import utils
+
+ALERT_ICONS = {'CRITICAL' :':scream:',
+               'WARNING'  :':cold_sweat:',
+               'OK'       :':smiley:',
+               'HOST DOWN':':finnadie:',
+               'HOST UP'  :':godmode:',}
+
 
 class Nagios(GiantDwarfPlugin):
     def create(self):
         self.last_run = datetime.now()
-        self.nagios_url = settings.NAGIOS_DOMAIN
+        self.nagios_url = self.config.get('Nagios', 'nagios_domain') 
         self.nagios_url += '/cgi-bin/nagios3/notifications.cgi'
         self.nagios_url += '?contact=all&archive=0&type=0&oldestfirst=on'
 
@@ -63,9 +69,10 @@ class Nagios(GiantDwarfPlugin):
         Send the event information to the Campfire room
         and return the last event's time
         """
-        html = utils.open_page(self.nagios_url, 
-                               username=settings.NAGIOS_USERNAME,
-                               password=settings.NAGIOS_PASSWORD,)
+        html = utils.open_page(
+            self.nagios_url, 
+            username=self.config.get('Nagios', 'nagios_username'),
+            password=self.config.get('Nagios', 'nagios_password'))
         if not html:
             return False
 
@@ -80,7 +87,7 @@ class Nagios(GiantDwarfPlugin):
 
             # Use Alien man if no icon has been defined for the event level
             try:
-                icon = settings.ALERT_ICONS[event['level']]
+                icon = ALERT_ICONS[event['level']]
             except KeyError:
                 icon = ':alien:'
 

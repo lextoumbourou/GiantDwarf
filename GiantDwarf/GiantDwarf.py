@@ -5,13 +5,75 @@ import pkgutil
 import os
 import re
 import logging
+import ConfigParser
 
 from pyfire import Campfire
 from BeautifulSoup import BeautifulSoup
 
-import settings
+GD_NAMES = ("GiantDwarf", 'giantdwarf', "GD", "gd")
 
-GD_NAMES = ("GiantDwarf", "GD", "gd")
+
+class RawConfigParserUpper(ConfigParser.RawConfigParser):
+    """
+    Overwriting the parent config parser to allow
+    uppercase config parameters as per docs
+    """
+    def optionxform(self, optionstr):
+        return optionstr
+
+
+def load_config():
+    """
+    Search for the giantdwarf.conf file in the following order:
+    1. Current directory,
+    2. Process owner's home path,
+    3. /etc/giantdwarf/,
+    4. Location specified in the GIANTDWARF_CONF environment variable
+    Variables in configs found later will overwrite those found earlier
+    """
+    config = RawConfigParserUpper()
+
+    for location in (
+            os.curdir, "/etc/giantdwarf/",  
+            os.path.expanduser("~"), os.environ.get("GIANTDWARF_CONF")):
+        if location:
+            try: 
+                with open(os.path.join(location, "giantdwarf.conf")) as source:
+                    config.readfp(source)
+            except IOError:
+                pass
+    return config
+
+
+def parse_config():
+    """
+    Returns a dictionary containing config parameters
+    or causes the program to exit()
+    """
+    config = load_config()
+
+    if not config.get('Campfire', 'token'):
+        print 'Token not found in giantdwarf.conf'
+        return False
+
+    if not config.get('Campfire', 'subdomain'):
+        print 'Subdomain not found in giantdwarf.conf'
+        return False
+
+    if not config.get('Campfire', 'room'):
+        print 'Room not found in giantdwarf.conf'
+        return False
+
+    # If they haven't specified a log file location, 
+    # put it somewhere sensible
+    if not config.get('General', 'log_file'):
+        config.set('General', 'log_file', '/var/log/giantdwarf.log')
+
+    # Same for use_ssl
+    if not config.get('Campfire', 'use_ssl'):
+        config.set('Campfire', 'use_ssl', 'yes')
+
+    return config
 
 
 def load_class(plugin, class_name):
@@ -27,53 +89,62 @@ class GiantDwarf():
     GiantDwarf class manages loading plugins and providing
     an interface for the pyfire class
     """
-    def __init__(self):
+    def __init__(self, config):
         """
         Init method loads all the plugins preparing the class
         """
+        self.config = config
+        self.is_connected = False
         self.passive_plugins = []
         self.active_plugins = {}
-        self.is_connected = False
         self.room = None
         self.message_re = re.compile(
             '\S+\s+(?P<plugin>\S+)\s+(?P<action>\S+)\s+(?P<data>.*)')
 
         # Configure logging
         self.logging = logging
+        if self.config.get('General', 'log_mode') == 'debug':
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
+
         self.logging.basicConfig(
             format="%(asctime)-15s %(message)s",
-            filename=settings.LOG_FILE,
-            level=logging.INFO)
+            filename=self.config.get('General', 'log_file'),
+            level=level)
 
     
     def _load_plugins(self):
         """
-        Load all plugins defined in the settings file populating the
+        Load all plugins defined in the config file populating the
         self.active_plugins and self.passive_plugins attributes
         """
         # Load passive plugins into a list
-        for plugin, class_name in settings.PASSIVE_PLUGINS:
+        for class_name, plugin in self.config.items('Passive Plugins'):
             loaded_class = load_class(plugin, class_name)
             # create an instance of the class
-            self.passive_plugins.append(loaded_class(self.room))
+            self.passive_plugins.append(loaded_class(self.room, config))
 
         # Load active plugins into a dict
-        for plugin, class_name in settings.ACTIVE_PLUGINS:
+        for class_name, plugin in self.config.items('Active Plugins'):
             loaded_class = load_class(plugin, class_name)
             # Just get the module name for use in the active plugin key
             module = plugin.split('.')[-1]
             # create an instance of the class
-            self.active_plugins[module] = loaded_class(self.room)
+            self.active_plugins[module] = loaded_class(self.room, config)
 
     def _start_campfire(self):
         """
         Connect to campfire and load plugins
         """
         # Setup Campfire and join our room
-        c = Campfire(settings.SUBDOMAIN, settings.TOKEN, 'x',
-                     ssl=settings.USE_SSL)
+        campfire = Campfire(
+            self.config.get('Campfire', 'subdomain'), 
+            self.config.get('Campfire', 'token'), 'x', 
+            ssl=self.config.getboolean('Campfire', 'use_ssl'))
         self.is_connected = True
-        self.room = c.get_room_by_name(settings.ROOM)
+        self.room = campfire.get_room_by_name(
+            self.config.get('Campfire', 'room'))
         self.room.join()
         self._load_plugins()
 
@@ -88,6 +159,7 @@ class GiantDwarf():
         user = ""
         if message.is_text():
             if message.body.startswith(GD_NAMES):
+                print message.body
                 message = self.message_re.match(message.body)
                 plugin = message.group('plugin')
                 action = message.group('action')
@@ -136,9 +208,10 @@ class GiantDwarfPlugin(object):
     """
     Each passive plugin should be a subclass of this
     """
-    def __init__(self, room):
+    def __init__(self, room, config):
         # Can be overwritten by subclasses to change interval
-        self.interval = settings.FETCH_INTERVAL
+        self.interval = 30 
+        self.config = config
         self._room = room
         self.create()
 
@@ -172,5 +245,9 @@ class GiantDwarfPlugin(object):
 
 
 if __name__ == '__main__':
-    gd = GiantDwarf()
+    config = parse_config()
+    if not config:
+        exit()
+
+    gd = GiantDwarf(config)
     gd.start()
