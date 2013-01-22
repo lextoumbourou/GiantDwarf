@@ -3,11 +3,10 @@ import json
 
 from GiantDwarf import GiantDwarfPlugin
 from lib import utils
-import settings
 
 class Jenkins(GiantDwarfPlugin):
     def create(self):
-        self.jenkins_url = settings.JENKINS_DOMAIN
+        self.jenkins_url = self.config.get('Jenkins', 'jenkins_domain') 
 
     def _list_jobs_like(self, search=''):
         output = "" 
@@ -67,13 +66,13 @@ class Jenkins(GiantDwarfPlugin):
     def _start_build(self, job):
         url = self.jenkins_url + "/job/{0}/build?token={1}".format(
                 job,
-                settings.JENKINS_API_TOKEN)
+                self.config.get('Jenkins', 'jenkins_api_token')
         # Ugh. I can't seem to get the Jenkins API authentication to work via the 
         # urllib2. Resorting to using calling a Wget subprocess. Sorry. I'll
         # come back to it.
         cmds = ["/usr/bin/wget", "--spider", "--auth-no-challenge",
-                "--http-user="+settings.JENKINS_USER, 
-                "--http-password="+settings.JENKINS_PASSWORD,
+                "--http-user="+self.config.get('Jenkins', 'jenkins_user'), 
+                "--http-password="+self.config.get('Jenkins', 'jenkins_password'),
                 "--no-proxy",
                url]
         try:
