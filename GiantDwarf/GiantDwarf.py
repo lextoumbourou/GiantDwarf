@@ -182,7 +182,6 @@ class GiantDwarf():
             if not self.is_connected:
                 self._start_campfire()
                 self.logging.info("Attached and ready to roll!")
-                self.room.speak('Attached and ready to roll!')
             try:
                 self.last_run = datetime.now()
                 # Run passive checks
