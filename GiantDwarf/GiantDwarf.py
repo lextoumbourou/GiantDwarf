@@ -235,15 +235,3 @@ class GiantDwarfPlugin(object):
 
     def run(self, action, data):
         pass
-
-
-def main():
-    config = parse_config()
-    if not config:
-        exit()
-
-    giant_dwarf = GiantDwarf(config)
-    giant_dwarf.start()
-
-if __name__ == '__main__':
-    main()
