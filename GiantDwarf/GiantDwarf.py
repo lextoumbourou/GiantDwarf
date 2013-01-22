@@ -10,7 +10,7 @@ import ConfigParser
 from pyfire import Campfire
 from BeautifulSoup import BeautifulSoup
 
-GD_NAMES = ("GiantDwarf", 'giantdwarf', "GD", "gd")
+GD_NAMES = ('GiantDwarf', 'giantdwarf', 'GD', 'gd')
 
 
 class RawConfigParserUpper(ConfigParser.RawConfigParser):
@@ -34,10 +34,10 @@ def load_config():
     config = RawConfigParserUpper()
 
     for location in (
-            os.curdir, "/etc/giantdwarf/",  
+            os.curdir, "/etc/giantdwarf/",
             os.path.expanduser("~"), os.environ.get("GIANTDWARF_CONF")):
         if location:
-            try: 
+            try:
                 with open(os.path.join(location, "giantdwarf.conf")) as source:
                     config.readfp(source)
             except IOError:
@@ -64,7 +64,7 @@ def parse_config():
         print 'Room not found in giantdwarf.conf'
         return False
 
-    # If they haven't specified a log file location, 
+    # If they haven't specified a log file location,
     # put it somewhere sensible
     if not config.get('General', 'log_file'):
         config.set('General', 'log_file', '/var/log/giantdwarf.log')
@@ -99,7 +99,7 @@ class GiantDwarf():
         self.active_plugins = {}
         self.room = None
         self.message_re = re.compile(
-            '\S+\s+(?P<plugin>\S+)\s+(?P<action>\S+)\s+(?P<data>.*)')
+            r'\S+\s+(?P<plugin>\S+)\s+(?P<action>\S+)\s+(?P<data>.*)')
 
         # Configure logging
         self.logging = logging
@@ -113,7 +113,6 @@ class GiantDwarf():
             filename=self.config.get('General', 'log_file'),
             level=level)
 
-    
     def _load_plugins(self):
         """
         Load all plugins defined in the config file populating the
@@ -139,8 +138,8 @@ class GiantDwarf():
         """
         # Setup Campfire and join our room
         campfire = Campfire(
-            self.config.get('Campfire', 'subdomain'), 
-            self.config.get('Campfire', 'token'), 'x', 
+            self.config.get('Campfire', 'subdomain'),
+            self.config.get('Campfire', 'token'), 'x',
             ssl=self.config.getboolean('Campfire', 'use_ssl'))
         self.is_connected = True
         self.room = campfire.get_room_by_name(
@@ -159,7 +158,6 @@ class GiantDwarf():
         user = ""
         if message.is_text():
             if message.body.startswith(GD_NAMES):
-                print message.body
                 message = self.message_re.match(message.body)
                 plugin = message.group('plugin')
                 action = message.group('action')
@@ -209,7 +207,7 @@ class GiantDwarfPlugin(object):
     """
     def __init__(self, room, config):
         # Can be overwritten by subclasses to change interval
-        self.interval = 30 
+        self.interval = 30
         self.config = config
         self._room = room
         self.create()
