@@ -53,8 +53,9 @@ pip install BeautifulSoup
 ```
 
 * [PyFire](https://github.com/fgimian/pyfire)
-Note: Unfortunately, at this stage it relies on @fgimian's fork of Pyfire due to the way
-transactional streaming is handled in the main repo
+
+*Note: Unfortunately, at this stage it relies on @fgimian's fork of Pyfire due to the way
+transactional streaming is handled in the main repo*
 
 License
 ------
