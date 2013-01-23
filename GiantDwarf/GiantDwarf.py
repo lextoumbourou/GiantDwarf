@@ -157,14 +157,15 @@ class GiantDwarf():
         if message.is_text():
             if message.body.startswith(GD_NAMES):
                 message = self.message_re.match(message.body)
-                plugin = message.group('plugin')
-                action = message.group('action')
-                data = message.group('data')
+                if message:
+                    plugin = message.group('plugin')
+                    action = message.group('action')
+                    data = message.group('data')
 
-                try:
-                    self.active_plugins[plugin].run(action, data)
-                except KeyError:
-                    self.room.speak('Unable to find plugin ' + plugin)
+                    try:
+                        self.active_plugins[plugin].run(action, data)
+                    except KeyError:
+                        self.room.speak('Unable to find plugin ' + plugin)
 
     def start(self):
         """
