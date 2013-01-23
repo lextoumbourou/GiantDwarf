@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='GiantDwarf',
-      version='0.5',
+      version='0.6',
       description='A simple Campfire bot written in Python',
       author='Lex Toumbourou',
       author_email='lextoumbourou@gmail.com',
