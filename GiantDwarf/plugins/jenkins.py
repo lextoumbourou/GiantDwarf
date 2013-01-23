@@ -66,7 +66,7 @@ class Jenkins(GiantDwarfPlugin):
     def _start_build(self, job):
         url = self.jenkins_url + "/job/{0}/build?token={1}".format(
                 job,
-                self.config.get('Jenkins', 'jenkins_api_token')
+                self.config.get('Jenkins', 'jenkins_api_token'))
         # Ugh. I can't seem to get the Jenkins API authentication to work via the 
         # urllib2. Resorting to using calling a Wget subprocess. Sorry. I'll
         # come back to it.
@@ -107,11 +107,3 @@ class Jenkins(GiantDwarfPlugin):
                 self.speak(out)
         else:
             self.speak("Dunno what you mean sorry.")
-
-
-if __name__ == '__main__':
-    jenkins = Jenkins()
-    #print jenkins._list_jobs_like("bpl-www")
-    job = "bpl-www-site-php5"
-    print jenkins._get_last_build(job)
-    #print jenkins._start_build("bpl-www-site-php5")
