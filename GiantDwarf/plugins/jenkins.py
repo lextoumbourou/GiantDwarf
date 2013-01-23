@@ -1,8 +1,8 @@
 import subprocess
 import json
 
-from GiantDwarf import GiantDwarfPlugin
-from lib import utils
+from GiantDwarf.GiantDwarf import GiantDwarfPlugin
+from GiantDwarf.lib import utils
 
 class Jenkins(GiantDwarfPlugin):
     def create(self):

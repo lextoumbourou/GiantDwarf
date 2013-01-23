@@ -2,8 +2,8 @@ from datetime import datetime
 
 from BeautifulSoup import BeautifulSoup
 
-from GiantDwarf import GiantDwarfPlugin
-from lib import utils
+from GiantDwarf.GiantDwarf import GiantDwarfPlugin
+from GiantDwarf.lib import utils
 
 ALERT_ICONS = {'CRITICAL' :':scream:',
                'WARNING'  :':cold_sweat:',
