@@ -163,7 +163,8 @@ class GiantDwarf():
                     try:
                         self.active_plugins[plugin].run(action, data)
                     except KeyError:
-                        self.room.speak('Unable to find plugin ' + plugin)
+                        self.logging.warning(
+                            'Unable to find requested plugin ' + plugin)
 
     def start(self):
         """
