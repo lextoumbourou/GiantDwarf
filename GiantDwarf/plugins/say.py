@@ -1,4 +1,4 @@
-from GiantDwarf import GiantDwarfPlugin
+from GiantDwarf.GiantDwarf import GiantDwarfPlugin
 
 
 class Say(GiantDwarfPlugin):
