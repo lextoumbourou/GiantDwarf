@@ -2,12 +2,29 @@ from datetime import datetime
 
 from requests.auth import HTTPBasicAuth
 from BeautifulSoup import BeautifulSoup
+import requests
+
+from GiantDwarf import GiantDwarfBasePlugin
+from lib import helpers
 
 
-class Nagios():
+ALERT_ICONS = {
+    'CRITICAL' :':scream:',
+    'WARNING'  :':cold_sweat:',
+    'OK'       :':smiley:',
+    'HOST DOWN':':finnadie:',
+    'HOST UP'  :':godmode:'
+}
+
+
+class Nagios(GiantDwarfBasePlugin):
     def create(self):
         self.last_run = datetime.now()
-        self.nagios_url = config.get(url) + (
+        self.last_run_per_instance = {}
+        self.interval = 5
+
+    def _get_url(self, base_url):
+        return base_url + (
             '/cgi-bin/nagios3/notifications.cgi'
             '?contact=all&archive=0&type=0&oldestfirst=on'
         )
@@ -44,7 +61,7 @@ class Nagios():
 
             output.append({
                 'host': host, 'service': service,
-                'level': level, 'time': self._to_datetime(time),
+                'level': level, 'time': helpers.to_datetime(time),
                 'info': info
             })
 
@@ -55,20 +72,25 @@ class Nagios():
         and return the last event's time
         """
         for instance in self.config['instances']:
-            html = request.get(
-                url=self.nagios_url, 
-                auth=HTTPBasicAuth(instance['username'], instance['password'])
+            instance_name = instance['name']
+            if instance_name not in self.last_run_per_instance:
+                self.last_run_per_instance[instance_name] = self.last_run
+
+            html = helpers.get_internal(
+                self._get_url(instance['url']),
+                instance['username'],
+                instance['password']
             )
 
             if not html:
-                return False
+                continue 
 
             nagios_events = self._get_events(html)
             if not nagios_events:
-                return False
+                continue 
 
             for event in nagios_events:
-                if event['time'] <= self.last_run:
+                if event['time'] <= self.last_run_per_instance[instance_name]:
                     # Event is older then last event, skip
                     continue
 
@@ -78,7 +100,7 @@ class Nagios():
                 except KeyError:
                     icon = ':alien:'
 
-                msg = "{} | {} ({}) | {} | {} | {}".format(
+                msg = "{} | {} | {} | {} | {} | {}".format(
                     icon, instance['name'], event['time'],
                      event['service'], event['host'], event['info']
                  )
@@ -90,13 +112,9 @@ class Nagios():
                     room = self.config['room']
 
                 self.conn.chat.post_message(
-                    room, msg, username='GiantDwarf',
-                    icon_url=(
-                        'https://s3-us-west-2.amazonaws.com/'
-                        'slack-files2/bot_icons/2014-05-28/2359113583_48.png'
-                    ) 
+                    room, msg, username=self.config.get('username'),
+                    icon_url=self.config.get('icon_url')
                 )
 
-        # We have a new last run time
-        self.last_run = nagios_events[-1]['time']
+            self.last_run_per_instance[instance_name] = nagios_events[-1]['time']
         return True

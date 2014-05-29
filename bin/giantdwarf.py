@@ -2,16 +2,15 @@
 import yaml
 from slacker import Slacker
 
-from .lib import GiantDwarf
-from .lib.helpers import parse_config
+from GiantDwarf import GiantDwarf
+
 
 if __name__ == '__main__':
-    config = yaml.load('config.yaml')
-
-    connection = Slacker(config['slack'].get('token'))
-    slack = GiantDwarf(config, connection)
+    config = yaml.load(open('config.yaml'))
     if not config:
         exit()
 
-    giantdwarf = GiantDwarf(config)
+    connection = Slacker(config.get('token'))
+
+    giantdwarf = GiantDwarf(config, connection)
     giantdwarf.start()

@@ -16,10 +16,10 @@ plugins:
     # Module and class name to be called within module
     # in the following format
     #
-    # ClassName: module.location
+    # module.Class
     #
-    # Eg: Nagios: GiantDwarf.plugins.nagios
-    nagios: plugins.nagios
+    # Eg: plugins.nagios.Nagios
+    - nagios: plugins.nagios
 
 # ########################################################
 # Plugin specific settings
@@ -28,3 +28,5 @@ nagios:
     room: 'nagios'
     instances:
         - {'name': 'Prod', 'url': 'https://somewhere.com/nagios/', 'username': 'my-username', 'password': 'my-password'}
+    icon_url: 'somelink'
+    username: 'GiantDwarf'
