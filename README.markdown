@@ -1,6 +1,6 @@
 GiantDwarf
 =========
-A simple Campfire bot written in Python 
+A simple Slack bot written in Python (see ```campfire``` branch for Campfire support)
 
 Installation
 ------------
@@ -17,15 +17,11 @@ lex@server:~/src$ cd GiantDwarf
 lex@server:~/src/GiantDwarf$ sudo python setup.py install 
 ```
 
-* Copy the **example-giantdwarf.conf** to **/etc/giantdwarf/giantdwarf.conf** or to **~/.giantdwarf.conf** and configure.
+* Copy the **example-config.yaml** to **/etc/giantdwarf/config.yaml** or to **~/.config.yaml** and configure.
 
 ```
 # API authentication token (found under My Info in Campfire)
 token: 'abcdefghijklmnop'
-
-# Part of domain before .campfire.com
-subdomain: 'WeBuiltItButHeWontCome' # don't include .campfirenow.com 
-...
 ```
 
 Usage
@@ -62,15 +58,6 @@ Plugin Development
 -----------------
 * Coming soon
 
-Prereqs
-------
-* BeautifulSoup 3
-
-```
-pip install BeautifulSoup
-```
-
-* [PyFire](https://github.com/mariano/pyfire)
 
 License
 ------
